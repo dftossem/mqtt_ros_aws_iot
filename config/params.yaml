@@ -1,0 +1,35 @@
+bridge:
+  - factory: mqtt_bridge.bridge:RosToMqttBridge
+    msg_type: std_msgs.msg:Bool
+    topic_from: /ping
+    topic_to: sdk/test/Python
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: std_msgs.msg:Bool
+    topic_from: ping
+    topic_to: sdk/test/Python
+  # private path
+  - factory: mqtt_bridge.bridge:RosToMqttBridge
+    msg_type: std_msgs.msg:String
+    topic_from: /private/echo
+    topic_to: ~/echo
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: std_msgs.msg:String
+    topic_from: ~/echo
+    topic_to: /private/back
+mqtt: 
+  connection: 
+    host: ENDPOINT # TODO: Find by typing 'aws iot describe-endpoint'. Requirement: AWS CLI
+    port: 8883
+    keepalive: 60
+    mode: both
+  client: 
+    clientId: basicPubSub
+    protocol: 4
+    websocket : False
+  private_path: device/001
+tls: 
+  rootCA: ABSOLUTE PATH OF root-CA.crt          # TODO: Change
+  certKey: ABSOLUTE PATH OF thing.cert.pem      # TODO: Change
+  privKey: ABSOLUTE PATH OF thing.private.key   # TODO: Change
+topic: sdk/test/Python
+deserializer: msgpack:loads
