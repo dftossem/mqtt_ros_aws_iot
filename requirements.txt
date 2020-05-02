@@ -1,3 +1,5 @@
 bson>=0.5.2
 inject>=3.3.1
+pymongo>=3.10.1
 msgpack-python>=0.4.8
+AWSIoTPythonSDK>=1.4.8

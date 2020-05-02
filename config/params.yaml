@@ -18,7 +18,7 @@ bridge:
     topic_to: /private/back
 mqtt: 
   connection: 
-    host: ENDPOINT # TODO: Find by typing 'aws iot describe-endpoint'. Requirement: AWS CLI
+    host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
     port: 8883
     keepalive: 60
     mode: both
@@ -28,8 +28,8 @@ mqtt:
     websocket : False
   private_path: device/001
 tls: 
-  rootCA: ABSOLUTE PATH OF root-CA.crt          # TODO: Change
-  certKey: ABSOLUTE PATH OF thing.cert.pem      # TODO: Change
-  privKey: ABSOLUTE PATH OF thing.private.key   # TODO: Change
+  rootCA: /home/dftossem/Documents/aws/iot/connect_device_package/root-CA.crt
+  certKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.cert.pem
+  privKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.private.key
 topic: sdk/test/Python
 deserializer: msgpack:loads

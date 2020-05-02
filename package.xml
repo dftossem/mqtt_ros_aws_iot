@@ -1,21 +1,23 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>mqtt_bridge</name>
-  <version>0.1.6</version>
-  <description>The mqtt_bridge package</description>
+  <name>mqtt_ros_aws_iot</name>
+  <version>0.0.1</version>
+  <description>The mqtt_ros_aws_iot bridge package</description>
 
   <author email="junya.hayashi@groove-x.com">Junya Hayashi</author>
-  <maintainer email="junya.hayashi@groove-x.com">Junya Hayashi</maintainer>
+  <maintainer email="dftossem@gmail.com">David Tosse</maintainer>
 
   <license>MIT</license>
 
-  <url>http://www.ros.org/wiki/mqtt_bridge</url>
+  <url>https://github.com/dftossem/mqtt_ros_aws_iot/wiki</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <exec_depend>rospy</exec_depend>
-  <exec_depend>rosbridge_library</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>rosbridge_library</exec_depend>
 
   <export>
   </export>
+
 </package>

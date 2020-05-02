@@ -1,0 +1,5 @@
+<launch>
+  <node name="mqtt_ros_aws_iot" pkg="mqtt_ros_aws_iot" type="mqtt_bridge_node.py" output="screen">
+    <rosparam command="load" file="$(find mqtt_ros_aws_iot)/config/params.yaml" />
+  </node>
+</launch>

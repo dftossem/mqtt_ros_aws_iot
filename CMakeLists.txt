@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mqtt_bridge)
+project(mqtt_ros_aws_iot)
 
 find_package(catkin REQUIRED)
 catkin_python_setup()
