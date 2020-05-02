@@ -2,7 +2,7 @@
 
 ##
 
-This package is an adaptation from [mqtt_bridge repository](https://github.com/groove-x/mqtt_bridge) and uses AWSIoTMQTTClient instead of paho-mqtt.
+This package is an adaptation from [mqtt_bridge repository](https://github.com/groove-x/mqtt_bridge) and uses AWSIoTPythonSDK instead of paho-mqtt.
 
 ## Download
 
