@@ -12,13 +12,9 @@ from .mqtt_client import create_private_path_extractor
 from .bridge import create_bridge
 from .util import lookup_object
 
-
-def create_config(mqtt_client, deserializer, mqtt_private_path):
-    if isinstance(deserializer, basestring):
-        deserializer = lookup_object(deserializer)
+def create_config(mqtt_client, mqtt_private_path):
     private_path_extractor = create_private_path_extractor(mqtt_private_path)
     def config(binder):
-        binder.bind('deserializer', deserializer)
         binder.bind(AWSIoTMQTTClient, mqtt_client)
         binder.bind('mqtt_private_path_extractor', private_path_extractor)
     return config
@@ -43,12 +39,9 @@ def mqtt_bridge_node():
     mqtt_client_factory = lookup_object(mqtt_client_factory_name)
     mqtt_client = mqtt_client_factory(params)
 
-    # load serializer and deserializer
-    deserializer = params.get('deserializer', 'json:loads')
-
     # dependency injection
     config = create_config(
-        mqtt_client, deserializer, mqtt_private_path)
+        mqtt_client, mqtt_private_path)
     inject.configure(config)
     
     # configure bridges
@@ -59,7 +52,7 @@ def mqtt_bridge_node():
     rospy.on_shutdown(mqtt_client.disconnect)
 
     # Connect and subscribe to AWS IoT
-    ans = mqtt_client.connect()
+    mqtt_client.connect()
 
     rospy.spin()
 

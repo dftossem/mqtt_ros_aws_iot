@@ -2,12 +2,22 @@
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 import ssl
-import json 
+import json
 import rospy
 import logging
 
 AllowedActions = ['both', 'publish', 'subscribe']
 
+# Custom MQTT message callback
+
+
+def customCallback(client, userdata, message):
+    rospy.loginfo('Custom callback')
+    print("Received a new message: ")
+    print(message.payload)
+    print("from topic: ")
+    print(message.topic)
+    print("--------------\n\n")
 
 def default_mqtt_client_factory(params):
     u""" MQTT Client factory
@@ -16,6 +26,7 @@ def default_mqtt_client_factory(params):
     :return mqtt.Client: MQTT Client
     """
     # create client
+    top_params = params.get('topic')
     tls_params = params.get('tls', {})
     mqtt_params = params.get('mqtt', {})
     conn_params = mqtt_params.get('connection', {})
@@ -29,13 +40,14 @@ def default_mqtt_client_factory(params):
     tls_ca = tls_params['rootCA']
     port = conn_params['port']
 
-    
     if mode not in AllowedActions:
-        rospy.logerr("Unknown --mode option %s. Must be one of %s" % (mode, str(AllowedActions)))
+        rospy.logerr("Unknown --mode option %s. Must be one of %s" %
+                     (mode, str(AllowedActions)))
         exit(2)
 
     if webSckt and tls_cert and tls_privKey:
-        rospy.logerr("X.509 cert authentication and WebSocket are mutual exclusive. Please pick one.")
+        rospy.logerr(
+            "X.509 cert authentication and WebSocket are mutual exclusive. Please pick one.")
         exit(2)
 
     if not webSckt and (not tls_cert or not tls_privKey):
@@ -52,14 +64,16 @@ def default_mqtt_client_factory(params):
     logger = logging.getLogger("AWSIoTPythonSDK.core")
     logger.setLevel(logging.DEBUG)
     streamHandler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     streamHandler.setFormatter(formatter)
     logger.addHandler(streamHandler)
 
     # Init AWSIoTMQTTClient
     myAWSIoTMQTTClient = None
     if webSckt:
-        myAWSIoTMQTTClient = AWSIoTMQTTClient(client_params['clientId'], useWebsocket=True)
+        myAWSIoTMQTTClient = AWSIoTMQTTClient(
+            client_params['clientId'], useWebsocket=True)
         myAWSIoTMQTTClient.configureEndpoint(host, port)
         myAWSIoTMQTTClient.configureCredentials(tls_ca)
     else:
@@ -69,19 +83,18 @@ def default_mqtt_client_factory(params):
 
     # AWSIoTMQTTClient connection configuration
     myAWSIoTMQTTClient.configureAutoReconnectBackoffTime(1, 32, 20)
-    myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
+    # Infinite offline Publish queueing
+    myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)
     myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
     myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
     myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-    # TODO: incoming messages @dftossem
-    # if mode == 'both' or mode == 'subscribe':
-    #     myAWSIoTMQTTClient.subscribe(top_params, 1, customCallback)
-    # time.sleep(2)
-
+    if mode == 'both' or mode == 'subscribe':
+        myAWSIoTMQTTClient.subscribe(top_params, 1, customCallback)
+    
     return myAWSIoTMQTTClient
 
-# TODO: Use or not @dftossem
+
 def create_private_path_extractor(mqtt_private_path):
     def extractor(topic_path):
         if topic_path.startswith('~/'):
@@ -90,4 +103,5 @@ def create_private_path_extractor(mqtt_private_path):
     return extractor
 
 
-__all__ = ['default_mqtt_client_factory', 'create_private_path_extractor']
+__all__ = ['default_mqtt_client_factory', 'create_private_path_extractor',
+           'customCallback']

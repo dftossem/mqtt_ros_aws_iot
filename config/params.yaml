@@ -5,17 +5,17 @@ bridge:
     topic_to: sdk/test/Python
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:Bool
-    topic_from: ping
-    topic_to: sdk/test/Python
+    topic_from: sdk/test/Python
+    topic_to: /pong
   # private path
-  - factory: mqtt_bridge.bridge:RosToMqttBridge
-    msg_type: std_msgs.msg:String
-    topic_from: /private/echo
-    topic_to: ~/echo
-  - factory: mqtt_bridge.bridge:MqttToRosBridge
-    msg_type: std_msgs.msg:String
-    topic_from: ~/echo
-    topic_to: /private/back
+  # - factory: mqtt_bridge.bridge:RosToMqttBridge
+  #   msg_type: std_msgs.msg:String
+  #   topic_from: /private/echo
+  #   topic_to: ~/echo
+  # - factory: mqtt_bridge.bridge:MqttToRosBridge
+  #   msg_type: std_msgs.msg:String
+  #   topic_from: echo
+  #   topic_to: /private/back
 mqtt: 
   connection: 
     host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
@@ -32,4 +32,3 @@ tls:
   certKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.cert.pem
   privKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.private.key
 topic: sdk/test/Python
-deserializer: msgpack:loads
