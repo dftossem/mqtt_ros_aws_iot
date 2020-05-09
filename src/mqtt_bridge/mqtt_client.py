@@ -2,6 +2,7 @@
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 import ssl
+import time
 import json
 import rospy
 import logging
@@ -19,7 +20,7 @@ def customCallback(client, userdata, message):
     print(message.topic)
     print("--------------\n\n")
 
-def default_mqtt_client_factory(params):
+def default_mqtt_client_factory(params, stopSubscribe=False):
     u""" MQTT Client factory
 
     :param dict param: configuration parameters
@@ -89,9 +90,6 @@ def default_mqtt_client_factory(params):
     myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
     myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-    if mode == 'both' or mode == 'subscribe':
-        myAWSIoTMQTTClient.subscribe(top_params, 1, customCallback)
-    
     return myAWSIoTMQTTClient
 
 
@@ -103,5 +101,10 @@ def create_private_path_extractor(mqtt_private_path):
     return extractor
 
 
+def createMqttClient():
+    params = rospy.get_param('~', {})
+    myAWSIoTMQTTClient = default_mqtt_client_factory(params, stopSubscribe=True)
+    return myAWSIoTMQTTClient
+
 __all__ = ['default_mqtt_client_factory', 'create_private_path_extractor',
-           'customCallback']
+           'customCallback', 'createMqttClient']

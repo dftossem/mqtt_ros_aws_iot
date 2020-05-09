@@ -26,12 +26,8 @@ def mqtt_bridge_node():
     # load parameters
     params = rospy.get_param('~', {})
     mqtt_params = params.get('mqtt')
-    top_params = params.get('topic')
     bridge_params = params.pop('bridge', [])
-    conn_params = mqtt_params.get('connection')
     mqtt_private_path = mqtt_params.get('private_path', '')
-
-    conMode = conn_params['mode']
 
     # create mqtt client
     mqtt_client_factory_name = rospy.get_param(
@@ -49,7 +45,12 @@ def mqtt_bridge_node():
     for bridge_args in bridge_params:
         bridges.append(create_bridge(**bridge_args))
 
-    rospy.on_shutdown(mqtt_client.disconnect)
+    def disconnect():
+        mqtt_client.disconnect()
+        for bridge in bridges:
+            bridge.disconnect()
+
+    rospy.on_shutdown(disconnect)
 
     # Connect and subscribe to AWS IoT
     mqtt_client.connect()

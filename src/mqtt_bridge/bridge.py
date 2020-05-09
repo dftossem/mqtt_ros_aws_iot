@@ -11,6 +11,7 @@ from std_msgs.msg import Bool
 import json
 
 from .util import lookup_object, extract_values, populate_instance
+from .mqtt_client import createMqttClient, customCallback
 
 
 def create_bridge(factory, msg_type, topic_from, topic_to):
@@ -75,6 +76,9 @@ class RosToMqttBridge(Bridge):
         payload = json_message_converter.convert_ros_message_to_json(msg)
         self._mqtt_client.publish(topic=self._topic_to, payload=payload, QoS=1)
 
+    def disconnect():
+        pass
+
 
 class MqttToRosBridge(Bridge):
     u""" Bridge from MQTT to ROS topic
@@ -94,17 +98,27 @@ class MqttToRosBridge(Bridge):
         self._queue_size = queue_size
         self._last_published = rospy.get_time()
         self._interval = None if frequency is None else 1.0 / frequency
-        self._mqtt_client.onMessage = self._callback_mqtt
+        self._mqtt_client = createMqttClient()
+        self._mqtt_client.subscribe(topic_from, 1, self._callback_mqtt)
+        self._mqtt_client.connect()
         self._publisher = rospy.Publisher(
             self._topic_to, self._msg_type, queue_size=self._queue_size)
 
-    def _callback_mqtt(self, mqtt_msg):
+    def disconnect():
+        self._mqtt_client.disconnect()
+
+    def _callback_mqtt(self, client, userdata, mqtt_msg):
         u""" callback from MQTT
 
         :param mqtt.Client client: MQTT client used in connection
         :param userdata: user defined data
         :param mqtt.MQTTMessage mqtt_msg: MQTT message
         """
+
+        print("got %s, expected %s: running: %r" % ( mqtt_msg.topic, self._topic_from, mqtt_msg.topic == self._topic_from))
+        if mqtt_msg.topic != self._topic_from:
+            return
+
         rospy.loginfo("MQTT received from {}".format(mqtt_msg.topic))
         now = rospy.get_time()
 
