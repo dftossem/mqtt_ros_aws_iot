@@ -9,7 +9,7 @@ import logging
 
 AllowedActions = ['both', 'publish', 'subscribe']
 
-def default_mqtt_client_factory(params):
+def createMqttClient(params):
     u""" MQTT Client factory
 
     :param dict param: configuration parameters
@@ -50,14 +50,14 @@ def default_mqtt_client_factory(params):
     if not webSckt and not port:  # When no port override for non-WebSocket, default to 8883
         port = 8883
 
-    # Configure logging
-    logger = logging.getLogger("AWSIoTPythonSDK.core")
-    logger.setLevel(logging.DEBUG)
-    streamHandler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    streamHandler.setFormatter(formatter)
-    logger.addHandler(streamHandler)
+    # # Configure logging, commented = off
+    # logger = logging.getLogger("AWSIoTPythonSDK.core")
+    # logger.setLevel(logging.DEBUG)
+    # streamHandler = logging.StreamHandler()
+    # formatter = logging.Formatter(
+    #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # streamHandler.setFormatter(formatter)
+    # logger.addHandler(streamHandler)
 
     # Init AWSIoTMQTTClient
     myAWSIoTMQTTClient = None
@@ -79,10 +79,6 @@ def default_mqtt_client_factory(params):
     myAWSIoTMQTTClient.configureConnectDisconnectTimeout(20)  # 10 sec
     myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-    return myAWSIoTMQTTClient
-
-def createMqttClient(params):
-    myAWSIoTMQTTClient = default_mqtt_client_factory(params)
     return myAWSIoTMQTTClient
 
 __all__ = ['createMqttClient']
