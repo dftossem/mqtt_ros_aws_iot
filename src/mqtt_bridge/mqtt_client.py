@@ -9,18 +9,7 @@ import logging
 
 AllowedActions = ['both', 'publish', 'subscribe']
 
-# Custom MQTT message callback
-
-
-def customCallback(client, userdata, message):
-    rospy.loginfo('Custom callback')
-    print("Received a new message: ")
-    print(message.payload)
-    print("from topic: ")
-    print(message.topic)
-    print("--------------\n\n")
-
-def default_mqtt_client_factory(params, stopSubscribe=False):
+def default_mqtt_client_factory(params):
     u""" MQTT Client factory
 
     :param dict param: configuration parameters
@@ -87,24 +76,13 @@ def default_mqtt_client_factory(params, stopSubscribe=False):
     # Infinite offline Publish queueing
     myAWSIoTMQTTClient.configureOfflinePublishQueueing(-1)
     myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
-    myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
+    myAWSIoTMQTTClient.configureConnectDisconnectTimeout(20)  # 10 sec
     myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
     return myAWSIoTMQTTClient
 
-
-def create_private_path_extractor(mqtt_private_path):
-    def extractor(topic_path):
-        if topic_path.startswith('~/'):
-            return '{}/{}'.format(mqtt_private_path, topic_path[2:])
-        return topic_path
-    return extractor
-
-
-def createMqttClient():
-    params = rospy.get_param('~', {})
-    myAWSIoTMQTTClient = default_mqtt_client_factory(params, stopSubscribe=True)
+def createMqttClient(params):
+    myAWSIoTMQTTClient = default_mqtt_client_factory(params)
     return myAWSIoTMQTTClient
 
-__all__ = ['default_mqtt_client_factory', 'create_private_path_extractor',
-           'customCallback', 'createMqttClient']
+__all__ = ['createMqttClient']

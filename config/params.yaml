@@ -1,5 +1,13 @@
 bridge:
   - factory: mqtt_bridge.bridge:RosToMqttBridge
+    msg_type: std_msgs.msg:String
+    topic_from: /status/scara
+    topic_to: sdk/test/scara
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: std_msgs.msg:String
+    topic_from: sdk/test/scara
+    topic_to: /status
+  - factory: mqtt_bridge.bridge:RosToMqttBridge
     msg_type: std_msgs.msg:Bool
     topic_from: /ping
     topic_to: sdk/test/Python
@@ -7,15 +15,6 @@ bridge:
     msg_type: std_msgs.msg:Bool
     topic_from: sdk/test/Python
     topic_to: /pong
-  # private path
-  - factory: mqtt_bridge.bridge:RosToMqttBridge
-    msg_type: std_msgs.msg:String
-    topic_from: /private/echo
-    topic_to: ~/echo
-  - factory: mqtt_bridge.bridge:MqttToRosBridge
-    msg_type: std_msgs.msg:String
-    topic_from: echo
-    topic_to: /private/back
 mqtt: 
   connection: 
     host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
@@ -26,9 +25,7 @@ mqtt:
     clientId: basicPubSub
     protocol: 4
     websocket : False
-  private_path: device/001
 tls: 
   rootCA: /home/dftossem/Documents/aws/iot/connect_device_package/root-CA.crt
-  certKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.cert.pem
-  privKey: /home/dftossem/Documents/aws/iot/connect_device_package/dummy.private.key
-topic: sdk/test/Python
+  certKey: /home/dftossem/Downloads/c35c934f0c-certificate.pem.crt
+  privKey: /home/dftossem/Downloads/c35c934f0c-private.pem.key

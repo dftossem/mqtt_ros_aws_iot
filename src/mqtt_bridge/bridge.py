@@ -7,12 +7,9 @@ from abc import ABCMeta
 
 import inject
 import rospy
-from std_msgs.msg import Bool
 import json
 
-from .util import lookup_object, extract_values, populate_instance
-from .mqtt_client import createMqttClient, customCallback
-
+from .util import lookup_object, populate_instance
 
 def create_bridge(factory, msg_type, topic_from, topic_to):
     u""" bridge generator function
@@ -40,13 +37,10 @@ def create_bridge(factory, msg_type, topic_from, topic_to):
 
 class Bridge(object):
     u""" Bridge base class
-
     :param mqtt.Client _mqtt_client: MQTT client
     """
     __metaclass__ = ABCMeta
     _mqtt_client = inject.attr(AWSIoTMQTTClient)
-    _extract_private_path = inject.attr('mqtt_private_path_extractor')
-
 
 class RosToMqttBridge(Bridge):
     u""" Bridge from ROS topic to MQTT
@@ -59,7 +53,7 @@ class RosToMqttBridge(Bridge):
 
     def __init__(self, topic_from, topic_to, msg_type, frequency=None):
         self._topic_from = topic_from
-        self._topic_to = self._extract_private_path(topic_to)
+        self._topic_to = topic_to
 
         self._last_published = rospy.get_time()
         self._interval = 0 if frequency is None else 1.0 / frequency
@@ -74,12 +68,10 @@ class RosToMqttBridge(Bridge):
 
     def _publish(self, msg):
         payload = json_message_converter.convert_ros_message_to_json(msg)
-        self._mqtt_client.publish(topic=self._topic_to, payload=payload, QoS=1)
+        self._mqtt_client.publish(topic=self._topic_to, payload=payload, QoS=0)
 
-    def disconnect():
+    def disconnect(self):
         pass
-
-
 class MqttToRosBridge(Bridge):
     u""" Bridge from MQTT to ROS topic
 
@@ -91,34 +83,27 @@ class MqttToRosBridge(Bridge):
     """
     def __init__(self, topic_from, topic_to, msg_type, frequency=None,
                  queue_size=10):
-        self._topic_from = self._extract_private_path(topic_from)
-        print("!!!!!%s resolved to %s" % (topic_from, self._topic_from))
+        self._topic_from = topic_from
         self._topic_to = topic_to
         self._msg_type = msg_type
         self._queue_size = queue_size
         self._last_published = rospy.get_time()
         self._interval = None if frequency is None else 1.0 / frequency
-        self._mqtt_client = createMqttClient()
-        self._mqtt_client.subscribe(topic_from, 1, self._callback_mqtt)
-        self._mqtt_client.connect()
+        ans = self._mqtt_client.subscribe(topic_from, 0, self.customCllbk)
+        # self._mqtt_client.onMessage =  self._callback_mqtt
         self._publisher = rospy.Publisher(
             self._topic_to, self._msg_type, queue_size=self._queue_size)
 
-    def disconnect():
-        self._mqtt_client.disconnect()
+    def customCllbk(self, msg):
+        print(msg)
 
-    def _callback_mqtt(self, client, userdata, mqtt_msg):
+    def _callback_mqtt(self, mqtt_msg):
         u""" callback from MQTT
 
         :param mqtt.Client client: MQTT client used in connection
         :param userdata: user defined data
         :param mqtt.MQTTMessage mqtt_msg: MQTT message
         """
-
-        print("got %s, expected %s: running: %r" % ( mqtt_msg.topic, self._topic_from, mqtt_msg.topic == self._topic_from))
-        if mqtt_msg.topic != self._topic_from:
-            return
-
         rospy.loginfo("MQTT received from {}".format(mqtt_msg.topic))
         now = rospy.get_time()
 
@@ -139,12 +124,11 @@ class MqttToRosBridge(Bridge):
         :param mqtt.Message mqtt_msg: MQTT Message
         :return rospy.Message: ROS Message
         """
-        print("got msg %s" % (mqtt_msg.payload))
-        ros_message = Bool(data=True if mqtt_msg.payload == "true" else False)
+        rospy.loginfo("got msg %s" % (mqtt_msg.payload))
+        ros_message = populate_instance(mqtt_msg.payload, self._msg_type())
+        print('ros_message')
+        print(ros_message)
         return ros_message
-        # msg_dict = json_message_converter.convert_json_to_ros_message(ros_message)
-        # return populate_instance(msg_dict, self._msg_type()) #qué putas!!!
-
 
 __all__ = ['register_bridge_factory', 'create_bridge', 'Bridge',
            'RosToMqttBridge', 'MqttToRosBridge']
