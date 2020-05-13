@@ -1,20 +1,20 @@
 bridge:
   - factory: mqtt_bridge.bridge:RosToMqttBridge
     msg_type: std_msgs.msg:String
-    topic_from: /status/scara
-    topic_to: sdk/test/scara
+    topic_from: /machine/logger
+    topic_to: logger/machine
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:String
-    topic_from: sdk/test/scara
-    topic_to: /status
+    topic_from: aws/iot/available
+    topic_to: /aws/iot/available
   - factory: mqtt_bridge.bridge:RosToMqttBridge
     msg_type: std_msgs.msg:Bool
-    topic_from: /ping
-    topic_to: sdk/test/Python
+    topic_from: /machine/available
+    topic_to: logger/machine/available
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:Bool
-    topic_from: sdk/test/Python
-    topic_to: /pong
+    topic_from: aws/sumerian/available
+    topic_to: /aws/sumerian/available
 mqtt: 
   connection: 
     host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com

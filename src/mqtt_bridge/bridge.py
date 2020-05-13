@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from rospy_message_converter import json_message_converter
+from rospy_message_converter import json_message_converter, message_converter
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from std_msgs.msg import Bool
 from abc import ABCMeta
 
 import inject
 import rospy
 import json
+import re
 
-from .util import lookup_object, populate_instance
+from .util import lookup_object
 
 def create_bridge(factory, msg_type, topic_from, topic_to):
     u""" bridge generator function
@@ -89,30 +91,23 @@ class MqttToRosBridge(Bridge):
         self._queue_size = queue_size
         self._last_published = rospy.get_time()
         self._interval = None if frequency is None else 1.0 / frequency
-        ans = self._mqtt_client.subscribe(topic_from, 0, self.customCllbk)
-        # self._mqtt_client.onMessage =  self._callback_mqtt
+        ans = self._mqtt_client.subscribe(topic_from, 0, self._callback_mqtt)
         self._publisher = rospy.Publisher(
             self._topic_to, self._msg_type, queue_size=self._queue_size)
 
-    def customCllbk(self, msg):
-        print(msg)
-
-    def _callback_mqtt(self, mqtt_msg):
+    def _callback_mqtt(self, client, userdata, mqtt_msg):
         u""" callback from MQTT
 
         :param mqtt.Client client: MQTT client used in connection
         :param userdata: user defined data
         :param mqtt.MQTTMessage mqtt_msg: MQTT message
         """
-        rospy.loginfo("MQTT received from {}".format(mqtt_msg.topic))
+        rospy.logdebug("MQTT received from {}".format(mqtt_msg.topic))
         now = rospy.get_time()
-
+        
         if self._interval is None or now - self._last_published >= self._interval:
             try:
                 ros_msg = self._create_ros_message(mqtt_msg)
-                print("publisher of type %s" % (self._msg_type))
-                print("publishes to topic %s" % (self._topic_to))
-                print("got from topic %s" % (self._topic_from))
                 self._publisher.publish(ros_msg)
                 self._last_published = now
             except Exception as e:
@@ -124,11 +119,18 @@ class MqttToRosBridge(Bridge):
         :param mqtt.Message mqtt_msg: MQTT Message
         :return rospy.Message: ROS Message
         """
-        rospy.loginfo("got msg %s" % (mqtt_msg.payload))
-        ros_message = populate_instance(mqtt_msg.payload, self._msg_type())
-        print('ros_message')
-        print(ros_message)
+        cnvrt_type = self._get_rosType(str(self._msg_type))
+        if(cnvrt_type == 'std_msgs/Bool'):
+            payload = Bool(data=True if mqtt_msg.payload == "true" else False)
+            ros_message = payload
+        else:
+            ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
         return ros_message
+
+    def _get_rosType(self, msg_type):
+        sep = msg_type.split('.')
+        shortype = re.split('\W+', sep[-1])
+        return 'std_msgs'+'/'+shortype[0]
 
 __all__ = ['register_bridge_factory', 'create_bridge', 'Bridge',
            'RosToMqttBridge', 'MqttToRosBridge']
