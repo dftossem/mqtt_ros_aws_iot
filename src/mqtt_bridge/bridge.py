@@ -1,26 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from rospy_message_converter import json_message_converter
+from rospy_message_converter import json_message_converter, message_converter
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-from abc import ABCMeta, abstractmethod
+from std_msgs.msg import Bool
+from abc import ABCMeta
 
 import inject
 import rospy
 import json
+import re
 
-from .util import lookup_object, extract_values, populate_instance
+from .util import lookup_object
 
-
-# Custom MQTT message callback
-def customCallback(client, userdata, message):
-    print("Received a new message: ")
-    print(message.payload)
-    print("from topic: ")
-    print(message.topic)
-    print("--------------\n\n")
-
-def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
+def create_bridge(factory, msg_type, topic_from, topic_to):
     u""" bridge generator function
 
     :param (str|class) factory: Bridge class
@@ -41,20 +34,15 @@ def create_bridge(factory, msg_type, topic_from, topic_to, **kwargs):
             "msg_type should be rospy.Message instance or its string"
             "reprensentation")
     return factory(
-        topic_from=topic_from, topic_to=topic_to, msg_type=msg_type, **kwargs)
+        topic_from=topic_from, topic_to=topic_to, msg_type=msg_type)
 
 
 class Bridge(object):
     u""" Bridge base class
-
     :param mqtt.Client _mqtt_client: MQTT client
-    :param _deserialize: message deserialize callable
     """
     __metaclass__ = ABCMeta
     _mqtt_client = inject.attr(AWSIoTMQTTClient)
-    _deserialize = inject.attr('deserializer')
-    _extract_private_path = inject.attr('mqtt_private_path_extractor')
-
 
 class RosToMqttBridge(Bridge):
     u""" Bridge from ROS topic to MQTT
@@ -67,7 +55,8 @@ class RosToMqttBridge(Bridge):
 
     def __init__(self, topic_from, topic_to, msg_type, frequency=None):
         self._topic_from = topic_from
-        self._topic_to = self._extract_private_path(topic_to)
+        self._topic_to = topic_to
+
         self._last_published = rospy.get_time()
         self._interval = 0 if frequency is None else 1.0 / frequency
         rospy.Subscriber(topic_from, msg_type, self._callback_ros)
@@ -81,9 +70,10 @@ class RosToMqttBridge(Bridge):
 
     def _publish(self, msg):
         payload = json_message_converter.convert_ros_message_to_json(msg)
-        self._mqtt_client.publish(topic=self._topic_to, payload=payload, QoS=1)
+        self._mqtt_client.publish(topic=self._topic_to, payload=payload, QoS=0)
 
-
+    def disconnect(self):
+        pass
 class MqttToRosBridge(Bridge):
     u""" Bridge from MQTT to ROS topic
 
@@ -93,18 +83,15 @@ class MqttToRosBridge(Bridge):
     :param (float|None) frequency: publish frequency
     :param int queue_size: ROS publisher's queue size
     """
-
     def __init__(self, topic_from, topic_to, msg_type, frequency=None,
                  queue_size=10):
-        self._topic_from = self._extract_private_path(topic_from)
+        self._topic_from = topic_from
         self._topic_to = topic_to
         self._msg_type = msg_type
         self._queue_size = queue_size
         self._last_published = rospy.get_time()
         self._interval = None if frequency is None else 1.0 / frequency
-
-        self._mqtt_client.subscribe(topic_from, 1, customCallback)
-        self._mqtt_client.onMessage = self._callback_mqtt
+        ans = self._mqtt_client.subscribe(topic_from, 0, self._callback_mqtt)
         self._publisher = rospy.Publisher(
             self._topic_to, self._msg_type, queue_size=self._queue_size)
 
@@ -117,7 +104,7 @@ class MqttToRosBridge(Bridge):
         """
         rospy.logdebug("MQTT received from {}".format(mqtt_msg.topic))
         now = rospy.get_time()
-
+        
         if self._interval is None or now - self._last_published >= self._interval:
             try:
                 ros_msg = self._create_ros_message(mqtt_msg)
@@ -132,9 +119,18 @@ class MqttToRosBridge(Bridge):
         :param mqtt.Message mqtt_msg: MQTT Message
         :return rospy.Message: ROS Message
         """
-        msg_dict = self._deserialize(mqtt_msg.payload)
-        return populate_instance(msg_dict, self._msg_type())
+        cnvrt_type = self._get_rosType(str(self._msg_type))
+        if(cnvrt_type == 'std_msgs/Bool'):
+            payload = Bool(data=True if mqtt_msg.payload == "true" else False)
+            ros_message = payload
+        else:
+            ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
+        return ros_message
 
+    def _get_rosType(self, msg_type):
+        sep = msg_type.split('.')
+        shortype = re.split('\W+', sep[-1])
+        return 'std_msgs'+'/'+shortype[0]
 
 __all__ = ['register_bridge_factory', 'create_bridge', 'Bridge',
            'RosToMqttBridge', 'MqttToRosBridge']

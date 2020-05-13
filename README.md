@@ -41,18 +41,57 @@ Use catkin to build your ROS workspace
 
 ### Verify on AWS IoT Core page
 
-Login to your AWS account and go to the AWS IoT Core page, then in the **Test** option set *sdk/test/Python* as Subscription topic and click the **Subscribe to topic** button.
+#### Policy
+
+Login to your AWS account and go to the AWS IoT Core page, be sure to have granted the right access. Warning: Code below accept every connection, be sure to change your policy after testing.
+
+```javascript
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish",
+        "iot:Subscribe",
+        "iot:Receive",
+        "iot:Connect"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+Then, in the **Test** option set *logger/machine* as Subscription topic and click the **Subscribe to topic** button.
 
 ### Local topic publish
 
 In a new terminal publish the ROS topic
 
-    rostopic pub /ping std_msgs/Bool "data: false"
+    rostopic pub -1 /machine/logger std_msgs/String "data: 'Hello world from local'"
 
 You should see the local topic payload data on the AWS IoT page just like this:
 
 ```javascript
 {
-  "data": false
+  "data": "Hello world from local"
 }
 ```
+### Publish topic from AWS IoT Core
+
+In a new terminal type the next command
+
+    rostopic echo /aws/sumerian/available
+
+Go to the AWS IoT Core page and in the **Test** option click on **Publish to a topic**, set *aws/sumerian/available* write: true and click **Publish to topic**
+
+![AWS publishing](./docs/assets/img/aws_iot_publish.png "Publishing from AWS IoT Core")
+
+You should see the response on your local machine just like this:
+
+```
+data: True
+---
+```
+
