@@ -17,7 +17,7 @@ bridge:
     topic_to: /aws/sumerian/available
 mqtt: 
   connection: 
-    host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
+    host: #TODO_Change
     port: 8883
     keepalive: 60
     mode: both
@@ -26,6 +26,6 @@ mqtt:
     protocol: 4
     websocket : False
 tls: 
-  rootCA: /home/dftossem/Documents/aws/iot/connect_device_package/root-CA.crt
-  certKey: /home/dftossem/Downloads/c35c934f0c-certificate.pem.crt
-  privKey: /home/dftossem/Downloads/c35c934f0c-private.pem.key
+  rootCA: #TODO_ChangePath/root-CA.crt
+  certKey: #TODO_ChangePath/certificate.pem.crt
+  privKey: #TODO_ChangePath/private.pem.key
