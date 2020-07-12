@@ -6,12 +6,12 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from std_msgs.msg import Bool
 from abc import ABCMeta
 
+from .util import lookup_object
+
 import inject
 import rospy
 import json
 import re
-
-from .util import lookup_object
 
 def create_bridge(factory, msg_type, topic_from, topic_to):
     u""" bridge generator function
@@ -121,7 +121,7 @@ class MqttToRosBridge(Bridge):
         """
         cnvrt_type = self._get_rosType(str(self._msg_type))
         if(cnvrt_type == 'std_msgs/Bool'):
-            payload = Bool(data=True if mqtt_msg.payload == "true" else False)
+            payload = Bool(data=True if self._get_boolVal(mqtt_msg.payload) else False)
             ros_message = payload
         else:
             ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
@@ -131,6 +131,9 @@ class MqttToRosBridge(Bridge):
         sep = msg_type.split('.')
         shortype = re.split('\W+', sep[-1])
         return 'std_msgs'+'/'+shortype[0]
+
+    def _get_boolVal(self, payload):
+        return payload.lower() in ("yes", "true", "1")
 
 __all__ = ['register_bridge_factory', 'create_bridge', 'Bridge',
            'RosToMqttBridge', 'MqttToRosBridge']
