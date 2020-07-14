@@ -17,7 +17,7 @@ bridge:
     topic_to: /aws/sumerian/available
 mqtt: 
   connection: 
-    host: #TODO_Change
+    host: # TODO
     port: 8883
     keepalive: 60
     mode: both
@@ -26,6 +26,6 @@ mqtt:
     protocol: 4
     websocket : False
 tls: 
-  rootCA: #TODO_ChangePath/root-CA.crt
-  certKey: #TODO_ChangePath/certificate.pem.crt
-  privKey: #TODO_ChangePath/private.pem.key
+  rootCA: # TODO
+  certKey: # TODO
+  privKey: # TODO

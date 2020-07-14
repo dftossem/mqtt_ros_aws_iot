@@ -2,6 +2,15 @@
 
 This package is an adaptation from [mqtt_bridge repository](https://github.com/groove-x/mqtt_bridge) and uses AWSIoTPythonSDK instead of paho-mqtt.
 
+## Requirements
+
+* AWS account
+  * AWS IoT Core project
+  * AWS IoT Thing
+* Linux 18.04.4 (Bionic Beaver)
+* ROS Melodic
+* Python 2.7
+
 ## Cloning the repository
 
 Do the cloning inside your ROS workspace
@@ -12,7 +21,9 @@ Do the cloning inside your ROS workspace
 ## Install requirements
 
     cd mqtt_ros_aws_iot
-    pip install -r requirements.txt
+    # Python requirements
+    pip install .
+    # ROS package requirements
     sudo apt install ros-melodic-rospy-message-converter
 
 ## Change connection parameters
