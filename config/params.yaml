@@ -26,6 +26,6 @@ mqtt:
     protocol: 4
     websocket : False
 tls: 
-  rootCA: # TODO
-  certKey: # TODO
-  privKey: # TODO
+  rootCA: #TODO_ChangePath/root-CA.crt
+  certKey: #TODO_ChangePath/certificate.pem.crt
+  privKey: #TODO_ChangePath/private.pem.key
