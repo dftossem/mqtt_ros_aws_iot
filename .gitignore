@@ -143,3 +143,6 @@ ENV/
 ### JetBrains
 # Project files
 .idea/
+
+# Testing
+testing.yaml

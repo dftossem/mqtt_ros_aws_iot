@@ -17,7 +17,7 @@ bridge:
     topic_to: /aws/sumerian/available
 mqtt: 
   connection: 
-    host: #TODO_Change
+    host: # TODO
     port: 8883
     keepalive: 60
     mode: both
