@@ -1,5 +1,9 @@
 <launch>
+  <arg name="node_start_delay" default="1.0" />  
   <node name="mqtt_ros_aws_iot" pkg="mqtt_ros_aws_iot" type="mqtt_bridge_node.py" output="screen">
     <rosparam command="load" file="$(find mqtt_ros_aws_iot)/config/params.yaml" />
   </node>
+  <node name="web_socket_server" pkg="rosbridge_server" type="rosbridge_websocket" output="screen" />
+  <node name="turtlesim_demo" pkg="turtlesim" type="turtlesim_node" />
+  <node name="web_socket_client" pkg="mqtt_ros_aws_iot" type="rosbridge_client.py" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
 </launch>

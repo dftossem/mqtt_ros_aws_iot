@@ -139,21 +139,19 @@ class WebsocketROSClient(object):
         return result
 
 if __name__ == '__main__':
-    rospy.init_node('websicket_client', anonymous=True)
+    rospy.init_node('rosbridge_client', anonymous=True)
 
     connect = WebsocketROSClient('127.0.0.1')
     try:
         while not rospy.is_shutdown():
             # Subscribe
-            incoming = connect.subscribe('/aws/iot/available', Twist())
+            incoming = connect.subscribe('/local/bochica/twist', Twist())
             # Publish to server
             connect.publish('/turtle1/cmd_vel', incoming)
-            # ### STEPS TODO: REMOVE FROM HERE
-            # roslaunch mqtt_ros_aws_iot connect.launch
-            # rosrun rosbridge_server rosbridge_websocket
-            # rosrun turtlesim turtlesim_node
             # python catkin_ws/src/mqtt_ros_aws_iot/src/rosbridge_client.py
+            # sumerian/bochica/twist
             # {"linear":{"x": -1.0,"y": 0.0,"z": 0.0},"angular": {"x": 0.0,"y": 0.0,"z": 1.0}}
+            # {"x": -1.0,"y": 0.0,"z": 0.0}
             
     except KeyboardInterrupt:
         pass

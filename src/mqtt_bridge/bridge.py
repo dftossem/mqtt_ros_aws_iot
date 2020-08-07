@@ -122,14 +122,17 @@ class MqttToRosBridge(Bridge):
         """
         cnvrt_type = self._get_rosType(str(self._msg_type))
         if(cnvrt_type == 'std_msgs/Bool'):
-            payload = Bool(data=True if self._get_boolVal(mqtt_msg.payload) else False)
-            ros_message = payload
+            ros_message = Bool(data=True if self._get_boolVal(mqtt_msg.payload) else False)
+        elif(cnvrt_type == 'std_msgs/String'):
+            ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
         elif(cnvrt_type == 'geometry_msgs/Twist'):
             message = json.dumps(json.loads(mqtt_msg.payload))
-            msg = json_message_converter.convert_json_to_ros_message('geometry_msgs/Twist', message)
-            ros_message = msg
+            ros_message = json_message_converter.convert_json_to_ros_message('geometry_msgs/Twist', message)
+        elif(cnvrt_type == 'geometry_msgs/Point'):
+            message = json.dumps(json.loads(mqtt_msg.payload))
+            ros_message = json_message_converter.convert_json_to_ros_message('geometry_msgs/Point', message)
         else:
-            ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
+            rospy.logerr('ROS message type not registered on bridge')
         return ros_message
 
     def _get_rosType(self, msg_type):

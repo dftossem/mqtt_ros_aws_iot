@@ -3,18 +3,22 @@ bridge:
     msg_type: std_msgs.msg:String
     topic_from: /machine/logger
     topic_to: logger/machine
-  - factory: mqtt_bridge.bridge:MqttToRosBridge
-    msg_type: geometry_msgs.msg:Twist
-    topic_from: aws/iot/available
-    topic_to: /aws/iot/available
   - factory: mqtt_bridge.bridge:RosToMqttBridge
     msg_type: std_msgs.msg:Bool
     topic_from: /machine/available
     topic_to: logger/machine/available
   - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: geometry_msgs.msg:Twist
+    topic_from: sumerian/bochica/twist
+    topic_to: /local/bochica/twist
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:Bool
-    topic_from: aws/sumerian/available
-    topic_to: /aws/sumerian/available
+    topic_from: sumerian/bochica/bool
+    topic_to: /local/bochica/bool
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: geometry_msgs.msg:Point
+    topic_from: sumerian/bochica/point
+    topic_to: /local/bochica/point
 mqtt: 
   connection: 
     host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
