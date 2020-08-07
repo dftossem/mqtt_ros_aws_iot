@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 from rospy_message_converter import json_message_converter, message_converter
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from abc import ABCMeta
 
@@ -123,14 +124,19 @@ class MqttToRosBridge(Bridge):
         if(cnvrt_type == 'std_msgs/Bool'):
             payload = Bool(data=True if self._get_boolVal(mqtt_msg.payload) else False)
             ros_message = payload
+        elif(cnvrt_type == 'geometry_msgs/Twist'):
+            message = json.dumps(json.loads(mqtt_msg.payload))
+            msg = json_message_converter.convert_json_to_ros_message('geometry_msgs/Twist', message)
+            ros_message = msg
         else:
             ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
         return ros_message
 
     def _get_rosType(self, msg_type):
-        sep = msg_type.split('.')
-        shortype = re.split('\W+', sep[-1])
-        return 'std_msgs'+'/'+shortype[0]
+        parts = msg_type.split('_')
+        pckg = parts[0].split("'")[1]
+        msgType = parts[2].split(".")[0]
+        return pckg + '_msgs/' + msgType
 
     def _get_boolVal(self, payload):
         return payload.lower() in ("yes", "true", "1")

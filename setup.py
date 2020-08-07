@@ -23,5 +23,6 @@ setuptools.setup(
                       'inject==3.5.1',
                       'pymongo>=3.10.1',
                       'msgpack-python>=0.4.8',
-                      'AWSIoTPythonSDK>=1.4.8'],
+                      'AWSIoTPythonSDK>=1.4.8',
+                      'websocket-client>=0.57.0'],
 )

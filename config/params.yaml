@@ -4,7 +4,7 @@ bridge:
     topic_from: /machine/logger
     topic_to: logger/machine
   - factory: mqtt_bridge.bridge:MqttToRosBridge
-    msg_type: std_msgs.msg:String
+    msg_type: geometry_msgs.msg:Twist
     topic_from: aws/iot/available
     topic_to: /aws/iot/available
   - factory: mqtt_bridge.bridge:RosToMqttBridge
@@ -17,7 +17,7 @@ bridge:
     topic_to: /aws/sumerian/available
 mqtt: 
   connection: 
-    host: # TODO
+    host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
     port: 8883
     keepalive: 60
     mode: both
@@ -26,6 +26,6 @@ mqtt:
     protocol: 4
     websocket : False
 tls: 
-  rootCA: #TODO_ChangePath/root-CA.crt
-  certKey: #TODO_ChangePath/certificate.pem.crt
-  privKey: #TODO_ChangePath/private.pem.key
+  rootCA: /home/dftossem/Documents/aws/credentials/dummy/root-CA.crt
+  certKey: /home/dftossem/Documents/aws/credentials/dummy/c35c934f0c-certificate.pem.crt
+  privKey: /home/dftossem/Documents/aws/credentials/dummy/c35c934f0c-private.pem.key
