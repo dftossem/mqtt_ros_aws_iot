@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 from rospy_message_converter import json_message_converter, message_converter
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-from geometry_msgs.msg import Twist
+from std_msgs.msg import Float64
 from std_msgs.msg import Bool
 from abc import ABCMeta
 
@@ -127,10 +127,12 @@ class MqttToRosBridge(Bridge):
             ros_message = message_converter.convert_dictionary_to_ros_message(cnvrt_type, {'data':  mqtt_msg.payload})
         elif(cnvrt_type == 'geometry_msgs/Twist'):
             message = json.dumps(json.loads(mqtt_msg.payload))
-            ros_message = json_message_converter.convert_json_to_ros_message('geometry_msgs/Twist', message)
+            ros_message = json_message_converter.convert_json_to_ros_message(cnvrt_type, message)
         elif(cnvrt_type == 'geometry_msgs/Point'):
             message = json.dumps(json.loads(mqtt_msg.payload))
-            ros_message = json_message_converter.convert_json_to_ros_message('geometry_msgs/Point', message)
+            ros_message = json_message_converter.convert_json_to_ros_message(cnvrt_type, message)
+        elif(cnvrt_type == 'std_msgs/Float64'):
+            ros_message = Float64(float(mqtt_msg.payload))
         else:
             rospy.logerr('ROS message type not registered on bridge')
         return ros_message

@@ -19,6 +19,10 @@ bridge:
     msg_type: geometry_msgs.msg:Point
     topic_from: sumerian/bochica/point
     topic_to: /local/bochica/point
+  - factory: mqtt_bridge.bridge:MqttToRosBridge
+    msg_type: std_msgs.msg:Float64
+    topic_from: sumerian/bochica/float
+    topic_to: /simple_model/base_to_first_controller/command
 mqtt: 
   connection: 
     host: a1ahmtv2bnhf50-ats.iot.us-east-1.amazonaws.com
