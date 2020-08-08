@@ -10,7 +10,7 @@ bridge:
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: geometry_msgs.msg:Twist
     topic_from: sumerian/bochica/twist
-    topic_to: /local/bochica/twist
+    topic_to: /turtle1/cmd_vel
   - factory: mqtt_bridge.bridge:MqttToRosBridge
     msg_type: std_msgs.msg:Bool
     topic_from: sumerian/bochica/bool
